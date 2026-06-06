@@ -108,7 +108,6 @@ class Yay {
 		this.#pieces.forEach((piece) => {
 			piece.remove();
 		});
-		console.log("removed");
 	}
 }
 

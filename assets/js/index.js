@@ -1,6 +1,6 @@
 import { yay } from "./yay.js";
 
-document.getElementById("yay-form").addEventListener("submit", (e) => {
+document.getElementById("yay-form").addEventListener("submit", async (e) => {
 	e.preventDefault();
 	yay(document.getElementById("yay-form-submit"), {
 		count: 80,
