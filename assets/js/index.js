@@ -8,8 +8,6 @@ document.getElementById("yay-form").addEventListener("submit", (e) => {
 		width: 16,
 		height: 16,
 		spread: 300,
-		mobileSpread: 50,
-		color: "hotpink",
-		image: "assets/images/heart.svg"
+		mobileSpread: 50
 	});
 });
