@@ -1,1 +1,59 @@
-assets/images/.DS_Store
+node_modules/
+jspm_packages/
+.pnp
+.pnp.js
+
+# Build output / distribution
+dist/
+build/
+lib/
+es/
+umd/
+out/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Caches
+.cache/
+.npm
+.eslintcache
+.parcel-cache/
+.rollup.cache/
+
+# Package manager artifacts
+*.tgz
+.yarn-integrity
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
