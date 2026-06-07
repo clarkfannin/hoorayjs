@@ -1,6 +1,6 @@
 {
   "name": "hoorayjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "lightweight confetti/burst effects with image support",
   "type": "module",
   "main": "src/hooray.js",
