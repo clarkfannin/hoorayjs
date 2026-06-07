@@ -24,7 +24,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/clarkfannin/yayjs.git"
+    "url": "git+https://github.com/clarkfannin/hoorayjs.git"
   },
   "author": "Clark Fannin",
   "license": "MIT"
