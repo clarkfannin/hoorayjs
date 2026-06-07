@@ -66,10 +66,12 @@ class Hooray {
 }
 
 class Piece {
+
 	#el;
 	#options;
 	#target;
 	#spread;
+	
 	constructor(target, options, spread) {
 		this.#options = options;
 		this.#target = target;
