@@ -1,5 +1,5 @@
 class Hooray {
-	static #isPainting = false;
+	static #painting = new WeakSet();
 
 	#pieces;
 	#target;
@@ -11,33 +11,32 @@ class Hooray {
 		this.#target = target;
 
 		this.#options = {
-			count: 100,
-			width: target.clientWidth / 4,
-			height: (target.clientWidth / 4) * 0.6,
-			duration: 3000,
-			spread: 200,
-			mobileSpread: 50,
+			count: 80,
+			duration: 3500,
+			width: 16,
+			height: 8,
+			spread: 380,
+			mobileSpread: 120,
+			once: true,
 			...options,
 		};
 
-		this.#warn();
+		this.#validate();
 	}
 
-	#warn() {
-		if (this.#options.count > 2500) {
-			console.warn(
-				`[hooray.js]:\nwarning: count capped at 2500. a high count is likely to impact performance.`,
-			);
-			this.#options.count = 2500;
-		} else if (this.#options.count > 1000)
+	#validate() {
+		if (this.#options.count > 1000)
 			console.warn(
 				"[hooray.js]:\nwarning: a high count is likely to impact performance.",
 			);
 	}
 
 	paint() {
-		if (Hooray.#isPainting) return;
-		Hooray.#isPainting = true;
+		if (window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true)
+			return;
+		if (Hooray.#painting.has(this.#target)) return;
+
+		Hooray.#painting.add(this.#target);
 
 		this.#whenViewportSettled(() => {
 			const frag = new DocumentFragment();
@@ -60,10 +59,12 @@ class Hooray {
 			}
 			document.body.append(frag);
 
-			setTimeout(() => {
-				Hooray.#isPainting = false;
-				this.#cleanup();
-			}, this.#options.duration);
+			Promise.all(this.#pieces.map((p) => p.finished.catch(() => {}))).then(
+				() => {
+					Hooray.#painting.delete(this.#target);
+					this.#cleanup();
+				},
+			);
 		});
 	}
 
@@ -101,13 +102,17 @@ class Piece {
 	#options;
 	#origin;
 	#spread;
+	#animation;
 
 	constructor(options, origin, spread) {
 		this.#options = options;
 		this.#origin = origin;
 		this.#spread = spread;
+
 		this.#el = document.createElement("span");
 		this.#el.classList.add("hooray-piece");
+
+		this.#applyBaseStyles();
 		this.#applySize();
 		this.#applyStyles();
 		this.#applyPosition();
@@ -116,6 +121,30 @@ class Piece {
 
 	get el() {
 		return this.#el;
+	}
+
+	get finished() {
+		return this.#animation.finished;
+	}
+
+	#applyBaseStyles() {
+		this.#el.style.display = "block";
+		this.#el.style.position = "fixed";
+
+		if (this.#options.image) {
+			if (this.#options.color) {
+				this.#el.style.maskSize = "contain";
+				this.#el.style.maskRepeat = "no-repeat";
+				this.#el.style.maskPosition = "center";
+				this.#el.style.webkitMaskSize = "contain";
+				this.#el.style.webkitMaskRepeat = "no-repeat";
+				this.#el.style.webkitMaskPosition = "center";
+			} else {
+				this.#el.style.backgroundSize = "contain";
+				this.#el.style.backgroundRepeat = "no-repeat";
+				this.#el.style.backgroundPosition = "center";
+			}
+		}
 	}
 
 	#applySize() {
@@ -134,6 +163,7 @@ class Piece {
 		if (this.#options.color) {
 			this.#el.style.backgroundColor = this.#options.color;
 			this.#el.style.maskImage = `url(${this.#options.image})`;
+			this.#el.style.webkitMaskImage = `url(${this.#options.image})`;
 		} else {
 			this.#el.style.backgroundImage = `url(${this.#options.image})`;
 		}
@@ -146,29 +176,47 @@ class Piece {
 
 	#applyTrajectory() {
 		const angle = Math.random() * Math.PI * 2;
-		const cap = 80 + Math.random() * this.#spread;
-		this.#el.style.setProperty(
-			`--burst-x`,
-			`${Math.random() * Math.cos(angle) * cap}px`,
+		const cap = Math.random() * this.#spread;
+		const burstX = Math.random() * Math.cos(angle) * cap;
+		const burstY = Math.random() * Math.sin(angle) * cap;
+		const rot = Math.floor(Math.random() * 360);
+
+		const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+		const distanceToBottom =
+			viewportHeight - this.#origin.y + this.#options.height;
+		const fallDistance = distanceToBottom * (1 + Math.random() * 0.4);
+
+		this.#animation = this.#el.animate(
+			[
+				{
+					transform: `translate(0, 0) rotate(${rot}deg)`,
+					opacity: 1,
+					easing: "ease-out",
+					offset: 0,
+				},
+				{
+					transform: `translate(${burstX}px, ${burstY}px) rotate(${rot + 120}deg)`,
+					easing: "ease-in",
+					offset: 0.15,
+				},
+				{
+					transform: `translate(${burstX}px, ${fallDistance}px) rotate(${rot + 540}deg)`,
+					opacity: 1,
+					offset: 1,
+				},
+			],
+			{
+				duration: this.#options.duration,
+				delay: Math.random() * 100,
+				easing: "ease-out",
+				fill: "both",
+			},
 		);
-		this.#el.style.setProperty(
-			`--burst-y`,
-			`${Math.random() * Math.sin(angle) * cap}px`,
-		);
-		this.#el.style.setProperty(`--fall-x`, `0px`);
-		this.#el.style.setProperty(
-			`--rot`,
-			`${Math.floor(Math.random() * 365)}deg`,
-		);
-		this.#el.style.setProperty(
-			`--duration`,
-			`${(this.#options.duration / 1000).toFixed(2)}s`,
-		);
-		this.#el.style.animationDelay = `${Math.random() * 0.1}s`;
 	}
 }
 
 export const hooray = (target, options = {}) => {
 	const h = new Hooray(target, options);
 	h.paint();
+	return h;
 };

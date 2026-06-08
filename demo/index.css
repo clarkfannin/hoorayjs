@@ -14,7 +14,7 @@ body {
 }
 
 #hooray-form {
-    background-color: rgb(250, 249, 240);
+    background-color: rgb(186, 238, 161);
     border-radius: 16px;
     border: 2px solid black;
     box-shadow: 2px 2px 2px black;
@@ -39,6 +39,7 @@ body {
 
 #hooray-form-input {
     border-radius: 8px;
+    border: 1px solid black;
     font-size: 16px;
     padding: 4px;
 }
@@ -50,46 +51,14 @@ body {
 #hooray-form-submit {
     background: black;
     border-radius: 8px;
+    border: 1px solid black;
     color: rgb(250, 249, 240);
     cursor: pointer;
     font-size: 16px;
-    padding: 4px;
+    padding: 4px 8px;
 }
 
 #hooray-form-submit:active {
-    padding: 3px;
+    padding: 3px 7px;
     margin: 1px;
-}
-
-.hooray-piece {
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    mask-size: contain;
-    mask-repeat: no-repeat;
-    mask-position: center;
-    -webkit-mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    display: block;
-    position: fixed;
-    animation: hooray-fall var(--duration) ease-out both;
-}
-
-@keyframes hooray-fall {
-    0% {
-        transform: translate(0, 0) rotate(var(--rot));
-        animation-timing-function: ease-out;
-        opacity: 1;
-    }
-
-    15% {
-        transform: translate(var(--burst-x), var(--burst-y)) rotate(calc(var(--rot) + 120deg));
-        animation-timing-function: ease-in;
-    }
-
-    100% {
-        transform: translate(calc(var(--burst-x) + var(--fall-x)), calc(100vh + 100%)) rotate(calc(var(--rot) + 540deg));
-        opacity: 1;
-    }
 }
