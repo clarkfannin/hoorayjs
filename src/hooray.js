@@ -1,4 +1,9 @@
 class Hooray {
+	static #supported =
+		typeof document !== "undefined" &&
+		typeof document.createElement("div").animate === "function" &&
+		typeof Animation !== "undefined" &&
+		"finished" in Animation.prototype;
 	static #painting = new WeakSet();
 
 	#pieces;
@@ -12,9 +17,13 @@ class Hooray {
 
 		this.#options = {
 			count: 80,
-			duration: 3500,
+			mobileCount: 40,
+			duration: 3000,
 			width: 16,
 			height: 8,
+			mobileWidth: 16,
+			mobileHeight: 8,
+			randomSize: true,
 			spread: 380,
 			mobileSpread: 120,
 			once: true,
@@ -31,43 +40,19 @@ class Hooray {
 			);
 	}
 
-	paint() {
-		if (window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true)
-			return;
-		if (Hooray.#painting.has(this.#target)) return;
+	// preload image before animation for slower connections
+	#preloadImage() {
+		if (!this.#options.image) return Promise.resolve();
 
-		Hooray.#painting.add(this.#target);
-
-		this.#whenViewportSettled(() => {
-			const frag = new DocumentFragment();
-
-			const spread =
-				window.innerWidth < 800
-					? this.#options.mobileSpread
-					: this.#options.spread;
-
-			const rect = this.#target.getBoundingClientRect();
-			const origin = {
-				x: rect.left + rect.width / 2,
-				y: rect.top + rect.height / 2,
-			};
-
-			for (let i = 0; i < this.#options.count; i++) {
-				const piece = new Piece(this.#options, origin, spread);
-				this.#pieces.push(piece);
-				frag.append(piece.el);
-			}
-			document.body.append(frag);
-
-			Promise.all(this.#pieces.map((p) => p.finished.catch(() => {}))).then(
-				() => {
-					Hooray.#painting.delete(this.#target);
-					this.#cleanup();
-				},
-			);
+		return new Promise((resolve) => {
+			const img = new Image();
+			img.onload = () => resolve();
+			img.onerror = () => resolve();
+			img.src = this.#options.image;
 		});
 	}
 
+	// virtual keyboard open/close shifts visual viewport - wait for it to settle
 	#whenViewportSettled(callback) {
 		const vv = window.visualViewport;
 		if (!vv) {
@@ -90,6 +75,58 @@ class Hooray {
 		timer = setTimeout(settle, 100);
 	}
 
+	async paint() {
+		if (!Hooray.#supported) return;
+		if (window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true)
+			return;
+		if (this.#options.once && Hooray.#painting.has(this.#target)) return;
+
+		Hooray.#painting.add(this.#target);
+
+		await this.#preloadImage();
+
+		this.#whenViewportSettled(() => {
+			const frag = new DocumentFragment();
+
+			const isMobile = window.innerWidth < 800;
+			const count = isMobile
+				? this.#options.mobileCount
+				: this.#options.count;
+			const spread = isMobile
+				? this.#options.mobileSpread
+				: this.#options.spread;
+
+			const rect = this.#target.getBoundingClientRect();
+			const origin = {
+				x: rect.left + rect.width / 2,
+				y: rect.top + rect.height / 2,
+			};
+
+			const viewportHeight =
+				window.visualViewport?.height ?? window.innerHeight;
+
+			for (let i = 0; i < count; i++) {
+				const piece = new Piece(
+					this.#options,
+					origin,
+					spread,
+					isMobile,
+					viewportHeight,
+				);
+				this.#pieces.push(piece);
+				frag.append(piece.el);
+			}
+			document.body.append(frag);
+
+			Promise.all(this.#pieces.map((p) => p.finished.catch(() => {}))).then(
+				() => {
+					Hooray.#painting.delete(this.#target);
+					this.#cleanup();
+				},
+			);
+		});
+	}
+
 	#cleanup() {
 		this.#pieces.forEach((piece) => {
 			piece.el.remove();
@@ -100,23 +137,19 @@ class Hooray {
 class Piece {
 	#el;
 	#options;
-	#origin;
-	#spread;
 	#animation;
 
-	constructor(options, origin, spread) {
+	constructor(options, origin, spread, isMobile, viewportHeight) {
 		this.#options = options;
-		this.#origin = origin;
-		this.#spread = spread;
 
 		this.#el = document.createElement("span");
 		this.#el.classList.add("hooray-piece");
 
 		this.#applyBaseStyles();
-		this.#applySize();
+		this.#applySize(isMobile);
 		this.#applyStyles();
-		this.#applyPosition();
-		this.#applyTrajectory();
+		this.#applyPosition(origin);
+		this.#applyTrajectory(origin, spread, viewportHeight);
 	}
 
 	get el() {
@@ -147,11 +180,26 @@ class Piece {
 		}
 	}
 
-	#applySize() {
-		const wRand = Math.random();
-		const hRand = this.#options.image ? wRand : Math.random();
-		this.#el.style.width = `${wRand * this.#options.width}px`;
-		this.#el.style.height = `${hRand * this.#options.height}px`;
+	#applySize(isMobile) {
+		const width = isMobile ? this.#options.mobileWidth : this.#options.width;
+		const height = isMobile
+			? this.#options.mobileHeight
+			: this.#options.height;
+
+		let wRand = 1;
+		if (this.#options.randomSize) {
+			wRand = Math.random();
+		}
+
+		let hRand = 1;
+		if (this.#options.image) {
+			hRand = wRand;
+		} else if (this.#options.randomSize) {
+			hRand = Math.random();
+		}
+
+		this.#el.style.width = `${wRand * width}px`;
+		this.#el.style.height = `${hRand * height}px`;
 	}
 
 	#applyStyles() {
@@ -169,21 +217,20 @@ class Piece {
 		}
 	}
 
-	#applyPosition() {
-		this.#el.style.left = `${this.#origin.x}px`;
-		this.#el.style.top = `${this.#origin.y}px`;
+	#applyPosition(origin) {
+		this.#el.style.left = `${origin.x}px`;
+		this.#el.style.top = `${origin.y}px`;
 	}
 
-	#applyTrajectory() {
+	#applyTrajectory(origin, spread, viewportHeight) {
 		const angle = Math.random() * Math.PI * 2;
-		const cap = Math.random() * this.#spread;
+		const cap = Math.random() * spread;
 		const burstX = Math.random() * Math.cos(angle) * cap;
 		const burstY = Math.random() * Math.sin(angle) * cap;
 		const rot = Math.floor(Math.random() * 360);
 
-		const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
 		const distanceToBottom =
-			viewportHeight - this.#origin.y + this.#options.height;
+			viewportHeight - origin.y + this.#options.height;
 		const fallDistance = distanceToBottom * (1 + Math.random() * 0.4);
 
 		this.#animation = this.#el.animate(

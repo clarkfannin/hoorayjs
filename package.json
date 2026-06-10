@@ -6,8 +6,7 @@
   "main": "src/hooray.js",
   "module": "src/hooray.js",
   "exports": {
-    ".": "./src/hooray.js",
-    "./hooray.css": "./src/hooray.css"
+    ".": "./src/hooray.js"
   },
   "files": [
     "src"

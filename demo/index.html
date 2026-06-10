@@ -1,21 +1,54 @@
 <!doctype html>
 <html>
 	<head>
-		<link rel="stylesheet" href="./index.css" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="./index.css" />
+		<title>hooray.js</title>
 	</head>
 	<body>
-		<form id="hooray-form">
-			<h1 id="hooray-form-title">hooray.js</h1>
-
-			<label id="hooray-form-label" for="hooray-form-input"
-				>enter something worth celebrating:</label
-			>
-			<div id="hooray-form-input-wrapper">
-				<input id="hooray-form-input" required />
-				<button id="hooray-form-submit" type="submit">submit</button>
-			</div>
-		</form>
+		<header id="hooray-header">
+			<h1 id="hooray-header-title">hooray.js</h1>
+			<img id="hooray-header-logo" src="images/hooray.svg" alt="hooray.js logo" />
+		</header>
+		<main>
+			<section id="hooray-intro">
+				<h2 id="hooray-intro-heading">
+					a tiny confetti library
+				</h2>
+				<p>highly customizable *with support for images!*</p>
+				<pre id="hooray-install"><code><span class="tok-prompt">$</span> <span class="tok-cmd">npm</span> <span class="tok-sub">install</span> <span class="tok-pkg">hoorayjs</span></code></pre>
+			</section>
+			<section id="hooray-demo">
+				<form id="hooray-form">
+					<label id="hooray-form-label" for="hooray-form-input"
+						>enter something worth celebrating:</label
+					>
+					<div id="hooray-form-input-wrapper">
+						<input id="hooray-form-input" required />
+						<button id="hooray-form-submit" type="submit">submit</button>
+					</div>
+				</form>
+				<div id="hooray-controls">
+					<select id="hooray-controls-dropdown">
+						<option value="confetti">confetti (default)</option>
+						<option value="stars">stars</option>
+						<option value="hearts">hearts</option>
+					</select>
+				</div>
+			</section>
+		</main>
+		<footer>
+			<p>
+				created by
+				<a href="https://github.com/clarkfannin" target="_blank" rel="noopener noreferrer">clark</a>
+			</p>
+		</footer>
 		<script type="module" src="index.js"></script>
 	</body>
 </html>
