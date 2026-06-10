@@ -19,7 +19,7 @@ const options = {
 	mobileHeight: 8,
 	spread: 300,
 	mobileSpread: 100,
-	once: true,
+	once: false,
 };
 
 const form = document.getElementById("hooray-form");
@@ -44,10 +44,6 @@ form.addEventListener("submit", handleSubmit);
 dropdown.addEventListener("change", (e) => {
 	selection = e.target.value;
 });
-
-window.unlock = () => {
-	options.once = false;
-};
 
 window.targetCenter = () => {
 	target = document.querySelector("main");

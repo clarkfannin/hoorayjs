@@ -26,7 +26,7 @@ class Hooray {
 			randomSize: true,
 			spread: 380,
 			mobileSpread: 120,
-			once: true,
+			once: false,
 			...options,
 		};
 
