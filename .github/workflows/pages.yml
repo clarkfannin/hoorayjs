@@ -24,8 +24,8 @@ jobs:
       - name: Assemble site (demo at root, src alongside)
         run: |
           mkdir -p _site
-          # demo/index.html and index.js become the site root
-          cp demo/index.html demo/index.js _site/
+          # everything in demo/ (html, css, js, images) becomes the site root
+          cp -R demo/. _site/
           # the library source the demo imports via ../src/
           cp -R src _site/src
           # rewrite the demo's parent-relative paths now that src/ sits beside it
