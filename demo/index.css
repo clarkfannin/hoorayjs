@@ -219,11 +219,35 @@ footer p {
     cursor: pointer;
     font-size: 16px;
     padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    min-height: 28px;
 }
 
 #hooray-form-submit:active {
-    padding: 3px 7px;
-    margin: 1px;
+    transform: scale(0.96);
+}
+
+#hooray-form-submit:disabled {
+    cursor: default;
+}
+
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(250, 249, 240, 0.3);
+    border-top-color: rgb(250, 249, 240);
+    border-radius: 50%;
+    animation: hooray-spin 0.6s linear infinite;
+}
+
+@keyframes hooray-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Controls */

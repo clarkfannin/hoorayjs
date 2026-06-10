@@ -102,8 +102,7 @@ class Hooray {
 				y: rect.top + rect.height / 2,
 			};
 
-			const viewportHeight =
-				window.visualViewport?.height ?? window.innerHeight;
+			const viewportHeight = window.innerHeight;
 
 			for (let i = 0; i < count; i++) {
 				const piece = new Piece(
@@ -224,9 +223,9 @@ class Piece {
 
 	#applyTrajectory(origin, spread, viewportHeight) {
 		const angle = Math.random() * Math.PI * 2;
-		const cap = Math.random() * spread;
-		const burstX = Math.random() * Math.cos(angle) * cap;
-		const burstY = Math.random() * Math.sin(angle) * cap;
+		const radius = Math.sqrt(Math.random()) * spread;
+		const burstX = Math.cos(angle) * radius;
+		const burstY = Math.sin(angle) * radius;
 		const rot = Math.floor(Math.random() * 360);
 
 		const distanceToBottom =
