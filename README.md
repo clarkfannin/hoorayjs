@@ -1,4 +1,4 @@
-# hoorayjs
+# hooray.js
 
 lightweight confetti/burst effects with support for custom images and icons. no dependencies - based on the Web Animations API.
 
